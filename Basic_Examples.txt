@@ -1,0 +1,93 @@
+//creating an index
+
+PUT user?pretty
+{
+  "settings": {
+    "index" : {
+      "number_of_shards" : 1,
+      "number_of_replicas" : 0
+    }
+  }
+}
+
+//Create the mapping for the user index and type of profile
+
+PUT user/_mapping/profile?pretty
+{
+  "profile" : {
+    "properties" : {
+      "full_name" : { "type" : "text" },
+      "bio" : { "type" : "text" },
+      "age" : { "type" : "integer" },
+      "location" : { "type" : "geo_point" },
+      "created_on" : {
+        "type" : "date",
+        "format" : "date_time"
+      }
+    }
+  }
+}
+
+// CRUD Operations:
+
+//Creating the documents
+
+POST user/profile/1?pretty
+{
+  "full_name" : "Sachin Tendulkar",
+  "bio" : "Sachin is legend of Cricket",
+  "age" : "45",
+  "location" : "17.450001,78.466667",
+  "created_on" : "2018-03-07T22:38:10.000Z"
+}
+
+POST user/profile/2?pretty
+{
+  "full_name" : "Michel Jackson",
+  "bio" : "Legend of Dance and Music",
+  "age" : "60",
+  "location" : "41.1246110,-73.4232880",
+  "created_on" : "2018-03-07T22:42:34.000Z"
+}
+
+POST user/profile/3?pretty
+{
+  "full_name" : "Steve Jobs",
+  "bio" : "Apple founder",
+  "age" : "55",
+  "location" : "41.1246110,-73.4232880",
+  "created_on" : "2018-03-07T22:42:34.000Z"
+}
+
+//Updating the document
+
+POST user/profile/3/_update?pretty
+{
+  "doc": {
+    "location" : "40.7127840,-74.0059410"
+  }
+}
+
+// Delete the document
+
+DELETE user/profile/3?pretty
+
+// Retrieve the documents:
+
+GET user/profile/_search
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+GET user/profile/_search?pretty
+{
+  "query": {
+    "query_string": {
+      "default_field": "full_name",
+      "query": "Sachin Tendulkar"
+    }
+  }
+}
+
