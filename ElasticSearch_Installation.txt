@@ -1,0 +1,56 @@
+Elastic Search Installation Steps:
+
+1. Download & Install Java (1.7 or later)
+
+Download the rpm file from the below link:
+
+http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
+
+Install the downloaded rpm file with the following command:
+
+rpm -ivh jdk-*.rpm
+
+
+2. Download the elasticsearch rpm file from the below link:
+
+https://www.elastic.co/downloads/elasticsearch
+
+Install the downloaded rpm file with the following command:
+
+rpm -ivh elasticsearch-*.rpm
+
+Add elasticsearch as a Daemon with the following command:
+
+sudo chkconfig --add elasticsearch
+
+Start the elasticsearch as follows:
+
+sudo service elasticsearch start
+
+sudo service elasticsearch status
+
+3. Download the kibana rpm file from the below link:
+
+https://www.elastic.co/downloads/kibana
+
+Install the downloaded rpm file with the following command:
+
+rpm -ivh kibana-*.rpm
+
+Set the following properties in the Kibana configuration file:
+
+vi /etc/kibana/kibana.yml
+
+server.port: 5601
+server.host: "localhost"
+elasticsearch.url: "http://localhost:9200"
+
+Add kibana as a Daemon with the following command:
+
+sudo chkconfig --add kibana
+
+Start the kibana as follows:
+
+sudo service kibana start
+
+sudo service kibana status
