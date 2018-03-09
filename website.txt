@@ -1,0 +1,264 @@
+// Creating the index, type and document with our own id
+
+PUT /website/blog/123
+{
+  "title" : "My First Blog Entry",
+  "text" : "Just trying this out...!!!",
+  "date" : "2014/01/01"
+}
+
+// Creating a Document with Auto Generated IDs.
+
+POST website/blog/
+{
+  "title" : "My Second Blog Entry",
+  "text" : "Still trying this out...!!!",
+  "date" : "2014/01/01"
+}
+
+
+// Retrieving a full Document.
+
+GET website/blog/123
+
+// Retrieving a Document with only required fields.
+
+GET website/blog/123?_source=title,date
+
+// Retrieving a Document which doesn't exists
+
+GET website/blog/124
+
+// Retrieving only source from a Document.
+
+GET website/blog/123/_source
+
+// Checking whether a document exists or not
+
+// If Document exists, it will return 200 - OK status else 404 - Not Found status.
+
+HEAD /website/blog/126
+
+// Updating the whole document.
+
+PUT website/blog/123
+{
+  "title" : "First Blog Entry",
+  "text" : "I'm starting to get the hang of this...!!!",
+  "date" : "2014/01/02"
+}
+
+GET website/blog/123
+
+// Creating a new Document, and ensure that no document is updated it already exists with the same id.
+
+// This will through the version conflicts.
+
+PUT /website/blog/123/_create
+{
+  "title" : "First Blog Entry",
+  "text" : "I'm starting to get the hang of this...!!!",
+  "date" : "2014/01/02"
+}
+
+PUT /website/blog/123?op_type=create
+{
+  "title" : "First Blog Entry",
+  "text" : "I'm starting to get the hang of this...!!!",
+  "date" : "2014/01/02"
+}
+
+// This will create a new Document because there is no other document with same id 124.
+
+PUT /website/blog/124?op_type=create
+{
+  "title" : "My favourite Blog Entry",
+  "text" : "I'm a big fan of this blog...!!!",
+  "date" : "2014/01/03"
+}
+
+// Deleting a document.
+
+DELETE /website/blog/124
+
+// Dealing with CONFLICTS
+
+PUT website/blog/124?op_type=create
+{
+  "title" : "My favourite Blog Entry",
+  "text" : "I'm a big fan of this blog...!!!",
+  "date" : "2014/01/03"
+}
+
+GET website/blog/124
+
+// This Query for first time it will succeed, 
+
+PUT website/blog/124?version=1
+{
+  "title" : "Favourite Blog Entry",
+  "text" : "I'm a fan of this blog...!!!",
+  "date" : "2014/01/04"
+}
+
+//but if we run the same query again it will not. Because once updated the _version = 2.
+
+// If an older version of a document arrives after a new version, it can simply be ignored.
+
+PUT website/blog/124?version=1
+{
+  "title" : "Favourite Blog Entry",
+  "text" : "I'm a fan of this blog...!!!",
+  "date" : "2014/01/04"
+}
+
+// Partial Updates to the Document
+
+// The below query updates the field if that exists else new fields are add
+
+POST /website/blog/124/_update
+{
+  "doc": {
+    "tags" : [ "testing" ],
+    "views" : 0,
+    "date" : "2014/01/09"
+  }
+}
+
+GET /website/blog/124
+
+// Using scripts to make partial updates
+
+POST website/blog/124/_update
+{
+  "script": "ctx._source.views+=1"
+}
+
+// Script to add a new tag to the tags array.
+
+POST /website/blog/124/_update
+{
+  "script": {
+    "source":"ctx._source.tags.add(params.new_tag)",
+    "lang" : "painless",
+    "params" : {
+      "new_tag" : "search"
+    }
+  }
+}
+
+POST /website/blog/124/_update
+{
+  "script": {
+    "source" : "ctx._source.tags.add(params.new_tag)",
+    "lang" : "painless",
+    "params" : {
+      "new_tag" : "temp"
+    }
+  }
+}
+
+
+POST /website/blog/124/_update
+{
+  "script": {
+    "source" : "ctx._source.views+=params.count",
+    "lang": "painless",
+    "params": {
+      "count" : 2
+    }
+  }
+}
+
+// Deleting an element from list
+
+// Query is not working
+
+POST /website/blog/124/_update
+{
+  "script": {
+    "source" : "ctx._source.tags.remove(params.val)",
+    "lang": "painless",
+    "params": {
+      "val" : null
+    }
+  }
+}
+
+GET /website/blog/124
+
+// Adding a new field to the document
+
+POST /website/blog/124/_update
+{
+  "script": "ctx._source.new_field='some_value'"
+}
+
+// Removing the fields from a Document
+
+POST /website/blog/124/_update
+{
+  "script": "ctx._source.remove('new_field')"
+}
+
+// Retry on conflict, it tries for 5 times when it encounter conflicts
+
+POST /website/blog/124/_update?retry_on_conflict=5
+{
+  "script": "ctx._source.views+=1"
+}
+
+POST /website/blog/124/_update
+{
+  "script": "ctx._source.remove('views')"
+}
+
+// Updating a field which doesn't exists'
+
+POST /website/blog/124/_update
+{
+  "script": {
+    "source" : "ctx._source.views += params.count",
+    "lang": "painless",
+    "params": {
+      "count" : 2
+    }
+  },
+  "upsert": {
+    "views" : 0
+  }
+}
+
+
+// Checks if views = 3 then it will delete the document
+
+POST /website/blog/124/_update
+{
+  "script" : {
+    "source" : "ctx.op = ctx._source.views == params.count ? 'delete' : 'none'",
+    "params" : {
+    "count": 3
+    }
+  }
+}
+
+// Delete the document if tags array contails null values.
+
+POST /website/blog/124/_update
+{
+  "script" : "if (ctx._source.tags.contains(null) ) {ctx.op = 'delete'} else {ctx.op = 'none'}"
+}
+
+POST /website/blog/124/_update
+{
+  "script": {
+    "source" : "if (ctx._source.tags.contains(params.col) ) {ctx.op = 'delete'} else {ctx.op = 'none'}",
+    "lang": "painless", 
+    "params" : {
+      "col" : "temp"
+    }
+  }
+}
+
+
+GET /website/blog/124    
