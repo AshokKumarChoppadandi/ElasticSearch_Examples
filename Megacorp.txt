@@ -1,0 +1,162 @@
+// Creating 
+index  =>  megacorp
+type   =>  employee
+
+Documents
+
+PUT /megacorp/employee/1
+{
+  "first_name" : "John",
+  "last_name" : "Smith",
+  "age" : 25,
+  "about" : "I love to go rock climbing",
+  "interests": [ "sports", "music" ]
+}
+
+PUT /megacorp/employee/2
+{
+  "first_name" : "Jane",
+  "last_name" : "Smith",
+  "age" : 32,
+  "about" : "I like to collect rock albums",
+  "interests": [ "music" ]
+}
+
+PUT /megacorp/employee/3
+{
+  "first_name" : "Douglas",
+  "last_name" : "Fir",
+  "age" : 35,
+  "about": "I like to build cabinets",
+  "interests": [ "forestry" ]
+}
+
+PUT /megacorp/employee/4
+{
+  "first_name" : "Jane",
+  "last_name" : "Watson",
+  "age" : 33,
+  "about" : "I would like to listen rock band albums",
+  "interests": [ "music" ]
+}
+
+PUT /megacorp/employee/5
+{
+  "first_name" : "Didier",
+  "last_name" : "Quelard",
+  "age" : 28,
+  "about": "I like trekking",
+  "interests": [ "forestry" ]
+}
+
+// Select * from megacorp.employee;
+GET /megacorp/employee/_search
+
+// Select count(*) from megacorp.employee;
+GET /megacorp/employee/_count
+
+
+// select * from megacorp.employee where id = 1
+// id is like primary key
+GET /megacorp/employee/1
+
+// select * from megacorp.employee where last_name = 'Smith'
+GET /megacorp/employee/_search?q=last_name:Smith
+
+// select * from megacorp.employee where last_name = 'Smith'
+// DSL - Domain Specific Language
+
+GET megacorp/employee/_search
+{
+  "query": {
+    "match": {
+      "last_name": "Smith"
+    }
+  }
+}
+
+GET megacorp/employee/_search
+{
+  "query": {
+    "query_string": {
+      "default_field": "last_name",
+      "query": "Smith"
+    }
+  }
+}
+
+// select * from megacorp.employee where last_name = 'Smith' and age >= 30
+
+GET megacorp/employee/_search
+{
+  "query": {
+    "filtered" : {
+      "filter" : {
+        "range" : {
+          "age" : { "gt" : 30}
+        }
+      }
+    },
+    "query" : {
+        "match" : {
+          "last_name" : "Smith"
+        }
+      }
+  }
+}
+
+// Full Text Search
+
+// Get all the records from employee where it has "rock climing" in "about" column.
+
+GET /megacorp/employee/_search
+{
+  "query" : {
+    "match" : {
+      "about" : "rock climbing"
+    }
+  }
+}
+
+// Phrase Search
+
+// Exact combination of "rock climbing"
+
+GET /megacorp/employee/_search
+{
+  "query" : {
+    "match_phrase" : {
+      "about" : "rock climbing"
+    }
+  }
+}
+
+// Highlighting the search results
+
+GET /megacorp/employee/_search
+{
+  "query": {
+    "match": {
+      "about": "rock climbing"
+    }
+  },
+  "highlight": {
+    "fields" : {
+      "about" : {}
+    }
+  }
+}
+
+GET /megacorp/employee/_search
+{
+  "query": {
+    "match_phrase": {
+      "about": "rock climbing"
+    }
+  },
+  "highlight": {
+    "fields" : {
+      "about" : {}
+    }
+  }
+}
