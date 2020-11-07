@@ -1,6 +1,6 @@
 package com.bigtata.es.index.async;
 
-import com.bigtata.es.listener.DeleteIndexListener;
+import com.bigtata.es.index.listener.DeleteIndexListener;
 import org.apache.http.HttpHost;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.client.RequestOptions;
@@ -24,7 +24,7 @@ public class DeleteIndexAsync {
             client.indices().deleteAsync(deleteIndexRequest, RequestOptions.DEFAULT, new DeleteIndexListener());
 
             // Sleeping for 1 second, otherwise the client connection is closing because of Asynchronous Execution.
-            // Hence the listener methods are not invoking
+            // Otherwise the listener methods are not invoking
             Thread.sleep(1000L);
             client.close();
         } catch (IOException | InterruptedException e) {
