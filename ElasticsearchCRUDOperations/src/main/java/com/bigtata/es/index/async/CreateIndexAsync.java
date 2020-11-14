@@ -1,6 +1,6 @@
 package com.bigtata.es.index.async;
 
-import com.bigtata.es.listener.CreateIndexListener;
+import com.bigtata.es.index.listener.CreateIndexListener;
 import org.apache.http.HttpHost;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.client.RequestOptions;
@@ -14,7 +14,7 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 
 import java.io.IOException;
 
-public class CreateIndexAsynchronous {
+public class CreateIndexAsync {
     public static void main(String[] args) {
         String indexName = "employees";
 
@@ -66,7 +66,7 @@ public class CreateIndexAsynchronous {
             client.indices().createAsync(createIndexRequest, RequestOptions.DEFAULT, listener);
 
             // Sleeping for 1 second, otherwise the client connection is closing because of Asynchronous Execution.
-            // Hence the listener methods are not invoking
+            // Otherwise the listener methods are not invoking
             Thread.sleep(1000L);
             client.close();
         } catch (IOException e) {

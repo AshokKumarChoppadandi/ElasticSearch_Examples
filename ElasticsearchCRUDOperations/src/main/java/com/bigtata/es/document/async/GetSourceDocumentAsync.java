@@ -1,33 +1,33 @@
-package com.bigtata.es.index.async;
+package com.bigtata.es.document.async;
 
-import com.bigtata.es.index.listener.GetIndexListener;
+import com.bigtata.es.document.listener.GetSourceDocumentListener;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.client.indices.GetIndexRequest;
+import org.elasticsearch.client.core.GetSourceRequest;
 
 import java.io.IOException;
 
-public class GetIndexAsync {
+public class GetSourceDocumentAsync {
     public static void main(String[] args) {
         String indexName = "employees";
+
+        // Creating the RestHighLevelClient
         RestHighLevelClient client = new RestHighLevelClient(
                 RestClient.builder(
                         new HttpHost("localhost", 9200, "http")
                 )
         );
 
-        GetIndexRequest getIndexRequest = new GetIndexRequest(indexName);
+        GetSourceRequest getSourceRequest = new GetSourceRequest(indexName, Integer.toString(101));
+        client.getSourceAsync(getSourceRequest, RequestOptions.DEFAULT, new GetSourceDocumentListener());
 
         try {
-            client.indices().getAsync(getIndexRequest, RequestOptions.DEFAULT, new GetIndexListener(indexName));
-
             // Sleeping for 1 second, otherwise the client connection is closing because of Asynchronous Execution.
             // Otherwise the listener methods are not invoking
             Thread.sleep(1000L);
             client.close();
-
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
